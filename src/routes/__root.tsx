@@ -1,9 +1,11 @@
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
-import Footer from '../components/Footer'
-import Header from '../components/Header'
+import { Provider as ReduxProvider } from 'react-redux'
+import { PersistGate } from 'redux-persist/integration/react'
+import { Toaster } from '#/components/ui/sonner'
 import { AuthProvider } from '../contexts/AuthContext'
+import { store, persistor } from '../store'
 
 import appCss from '../styles.css?url'
 
@@ -20,7 +22,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Patient Portal',
       },
     ],
     links: [
@@ -41,14 +43,18 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
-        <AuthProvider>
-          {/* <Header /> */}
-          {children}
-          {/* <Footer /> */}
-        </AuthProvider>
+        <ReduxProvider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <AuthProvider>
+              {children}
+              <Toaster />
+            </AuthProvider>
+          </PersistGate>
+        </ReduxProvider>
         <TanStackDevtools
           config={{
-            position: 'bottom-right',
+            // bottom-right collides with the mobile bottom tab bar
+            position: 'top-right',
           }}
           plugins={[
             {

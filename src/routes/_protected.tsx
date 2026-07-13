@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, Navigate } from '@tanstack/react-router'
 import { useAuth } from '#/contexts/AuthContext'
+import { AppShell } from '#/components/AppShell'
 
 export const Route = createFileRoute('/_protected')({
   component: ProtectedLayout,
@@ -12,5 +13,9 @@ function ProtectedLayout() {
     return <Navigate to="/login" />
   }
 
-  return <Outlet />
+  return (
+    <AppShell>
+      <Outlet />
+    </AppShell>
+  )
 }

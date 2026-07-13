@@ -27,6 +27,19 @@
   --hero-a: rgba(79, 184, 178, 0.36);
   --hero-b: rgba(47, 106, 74, 0.2);
 
+  /* Semantic status colors — single source of truth for badges/pills
+     (payment status, prescription/appointment state) across the app. */
+  --status-success: #2f8f5b;
+  --status-success-bg: rgba(47, 143, 91, 0.12);
+  --status-warning: #b8860a;
+  --status-warning-bg: rgba(184, 134, 10, 0.12);
+  --status-danger: #c14545;
+  --status-danger-bg: rgba(193, 69, 69, 0.12);
+  --status-neutral: #5b6b73;
+  --status-neutral-bg: rgba(91, 107, 115, 0.12);
+  --status-info: #2f6a94;
+  --status-info-bg: rgba(47, 106, 148, 0.12);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -82,6 +95,17 @@
   --link-bg-hover: rgba(24, 44, 49, 0.8);
   --hero-a: rgba(96, 215, 207, 0.18);
   --hero-b: rgba(110, 200, 154, 0.12);
+
+  --status-success: #6ec89a;
+  --status-success-bg: rgba(110, 200, 154, 0.16);
+  --status-warning: #e0b84a;
+  --status-warning-bg: rgba(224, 184, 74, 0.16);
+  --status-danger: #e08080;
+  --status-danger-bg: rgba(224, 128, 128, 0.16);
+  --status-neutral: #9fb2ba;
+  --status-neutral-bg: rgba(159, 178, 186, 0.16);
+  --status-info: #7db8e0;
+  --status-info-bg: rgba(125, 184, 224, 0.16);
 
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
@@ -343,5 +367,84 @@ a {
   body {
     background-color: var(--background);
     color: var(--foreground);
+  }
+}
+
+/* Status pill and mobile tab bar live in the `components` layer — Tailwind
+   emits its utilities (including responsive sm:/lg: variants) into its own
+   layer, and CSS cascade layers always let unlayered rules beat layered ones
+   regardless of specificity. Without this, `sm:hidden` on .mobile-tab-bar
+   would silently lose to the plain `display: flex` below at any width. */
+@layer components {
+  /* Status pill — color driven entirely by the --status-* tokens above so a
+     theme swap only ever needs to touch :root / .dark. */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border-radius: 9999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--status-color, var(--status-neutral));
+    background: var(--status-bg, var(--status-neutral-bg));
+  }
+
+  .status-pill--success {
+    --status-color: var(--status-success);
+    --status-bg: var(--status-success-bg);
+  }
+  .status-pill--warning {
+    --status-color: var(--status-warning);
+    --status-bg: var(--status-warning-bg);
+  }
+  .status-pill--danger {
+    --status-color: var(--status-danger);
+    --status-bg: var(--status-danger-bg);
+  }
+  .status-pill--neutral {
+    --status-color: var(--status-neutral);
+    --status-bg: var(--status-neutral-bg);
+  }
+  .status-pill--info {
+    --status-color: var(--status-info);
+    --status-bg: var(--status-info-bg);
+  }
+
+  /* Bottom tab bar (mobile only) */
+  .mobile-tab-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    display: flex;
+    border-top: 1px solid var(--line);
+    background: var(--header-bg);
+    backdrop-filter: blur(14px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .mobile-tab-bar .tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.55rem 0.25rem 0.6rem;
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: var(--sea-ink-soft);
+    text-decoration: none;
+  }
+
+  .mobile-tab-bar .tab-item.is-active {
+    color: var(--lagoon-deep);
+  }
+
+  .mobile-tab-bar .tab-item svg {
+    width: 20px;
+    height: 20px;
   }
 }

@@ -3,9 +3,10 @@ import {
   RecaptchaVerifier,
   signInWithCredential,
   signInWithPhoneNumber,
-  signOut as firebaseSignOut,
-  type ConfirmationResult,
+  signOut as firebaseSignOut
+  
 } from 'firebase/auth'
+import type {ConfirmationResult} from 'firebase/auth';
 import { auth } from './firebase'
 
 export type { ConfirmationResult }

@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ProtectedRouteImport } from './routes/_protected'
 import { Route as ProtectedIndexRouteImport } from './routes/_protected/index'
-import { Route as ProtectedDashboardRouteImport } from './routes/_protected/dashboard'
-import { Route as ProtectedDashboardIndexRouteImport } from './routes/_protected/dashboard/index'
+import { Route as ProtectedHospitalsIndexRouteImport } from './routes/_protected/hospitals/index'
+import { Route as ProtectedHospitalsOrgIdIndexRouteImport } from './routes/_protected/hospitals/$orgId/index'
+import { Route as ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRouteImport } from './routes/_protected/hospitals/$orgId/prescriptions/$prescriptionId'
+import { Route as ProtectedHospitalsOrgIdBillsBillIdRouteImport } from './routes/_protected/hospitals/$orgId/bills/$billId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -29,48 +31,82 @@ const ProtectedIndexRoute = ProtectedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ProtectedRoute,
 } as any)
-const ProtectedDashboardRoute = ProtectedDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const ProtectedHospitalsIndexRoute = ProtectedHospitalsIndexRouteImport.update({
+  id: '/hospitals/',
+  path: '/hospitals/',
   getParentRoute: () => ProtectedRoute,
 } as any)
-const ProtectedDashboardIndexRoute = ProtectedDashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => ProtectedDashboardRoute,
-} as any)
+const ProtectedHospitalsOrgIdIndexRoute =
+  ProtectedHospitalsOrgIdIndexRouteImport.update({
+    id: '/hospitals/$orgId/',
+    path: '/hospitals/$orgId/',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+const ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRoute =
+  ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRouteImport.update({
+    id: '/hospitals/$orgId/prescriptions/$prescriptionId',
+    path: '/hospitals/$orgId/prescriptions/$prescriptionId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
+const ProtectedHospitalsOrgIdBillsBillIdRoute =
+  ProtectedHospitalsOrgIdBillsBillIdRouteImport.update({
+    id: '/hospitals/$orgId/bills/$billId',
+    path: '/hospitals/$orgId/bills/$billId',
+    getParentRoute: () => ProtectedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof ProtectedIndexRoute
   '/login': typeof LoginRoute
-  '/dashboard': typeof ProtectedDashboardRouteWithChildren
-  '/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/hospitals/': typeof ProtectedHospitalsIndexRoute
+  '/hospitals/$orgId/': typeof ProtectedHospitalsOrgIdIndexRoute
+  '/hospitals/$orgId/bills/$billId': typeof ProtectedHospitalsOrgIdBillsBillIdRoute
+  '/hospitals/$orgId/prescriptions/$prescriptionId': typeof ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/': typeof ProtectedIndexRoute
-  '/dashboard': typeof ProtectedDashboardIndexRoute
+  '/hospitals': typeof ProtectedHospitalsIndexRoute
+  '/hospitals/$orgId': typeof ProtectedHospitalsOrgIdIndexRoute
+  '/hospitals/$orgId/bills/$billId': typeof ProtectedHospitalsOrgIdBillsBillIdRoute
+  '/hospitals/$orgId/prescriptions/$prescriptionId': typeof ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_protected': typeof ProtectedRouteWithChildren
   '/login': typeof LoginRoute
-  '/_protected/dashboard': typeof ProtectedDashboardRouteWithChildren
   '/_protected/': typeof ProtectedIndexRoute
-  '/_protected/dashboard/': typeof ProtectedDashboardIndexRoute
+  '/_protected/hospitals/': typeof ProtectedHospitalsIndexRoute
+  '/_protected/hospitals/$orgId/': typeof ProtectedHospitalsOrgIdIndexRoute
+  '/_protected/hospitals/$orgId/bills/$billId': typeof ProtectedHospitalsOrgIdBillsBillIdRoute
+  '/_protected/hospitals/$orgId/prescriptions/$prescriptionId': typeof ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/dashboard' | '/dashboard/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/hospitals/'
+    | '/hospitals/$orgId/'
+    | '/hospitals/$orgId/bills/$billId'
+    | '/hospitals/$orgId/prescriptions/$prescriptionId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/' | '/dashboard'
+  to:
+    | '/login'
+    | '/'
+    | '/hospitals'
+    | '/hospitals/$orgId'
+    | '/hospitals/$orgId/bills/$billId'
+    | '/hospitals/$orgId/prescriptions/$prescriptionId'
   id:
     | '__root__'
     | '/_protected'
     | '/login'
-    | '/_protected/dashboard'
     | '/_protected/'
-    | '/_protected/dashboard/'
+    | '/_protected/hospitals/'
+    | '/_protected/hospitals/$orgId/'
+    | '/_protected/hospitals/$orgId/bills/$billId'
+    | '/_protected/hospitals/$orgId/prescriptions/$prescriptionId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -101,42 +137,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
-    '/_protected/dashboard': {
-      id: '/_protected/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof ProtectedDashboardRouteImport
+    '/_protected/hospitals/': {
+      id: '/_protected/hospitals/'
+      path: '/hospitals'
+      fullPath: '/hospitals/'
+      preLoaderRoute: typeof ProtectedHospitalsIndexRouteImport
       parentRoute: typeof ProtectedRoute
     }
-    '/_protected/dashboard/': {
-      id: '/_protected/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof ProtectedDashboardIndexRouteImport
-      parentRoute: typeof ProtectedDashboardRoute
+    '/_protected/hospitals/$orgId/': {
+      id: '/_protected/hospitals/$orgId/'
+      path: '/hospitals/$orgId'
+      fullPath: '/hospitals/$orgId/'
+      preLoaderRoute: typeof ProtectedHospitalsOrgIdIndexRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/hospitals/$orgId/prescriptions/$prescriptionId': {
+      id: '/_protected/hospitals/$orgId/prescriptions/$prescriptionId'
+      path: '/hospitals/$orgId/prescriptions/$prescriptionId'
+      fullPath: '/hospitals/$orgId/prescriptions/$prescriptionId'
+      preLoaderRoute: typeof ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRouteImport
+      parentRoute: typeof ProtectedRoute
+    }
+    '/_protected/hospitals/$orgId/bills/$billId': {
+      id: '/_protected/hospitals/$orgId/bills/$billId'
+      path: '/hospitals/$orgId/bills/$billId'
+      fullPath: '/hospitals/$orgId/bills/$billId'
+      preLoaderRoute: typeof ProtectedHospitalsOrgIdBillsBillIdRouteImport
+      parentRoute: typeof ProtectedRoute
     }
   }
 }
 
-interface ProtectedDashboardRouteChildren {
-  ProtectedDashboardIndexRoute: typeof ProtectedDashboardIndexRoute
-}
-
-const ProtectedDashboardRouteChildren: ProtectedDashboardRouteChildren = {
-  ProtectedDashboardIndexRoute: ProtectedDashboardIndexRoute,
-}
-
-const ProtectedDashboardRouteWithChildren =
-  ProtectedDashboardRoute._addFileChildren(ProtectedDashboardRouteChildren)
-
 interface ProtectedRouteChildren {
-  ProtectedDashboardRoute: typeof ProtectedDashboardRouteWithChildren
   ProtectedIndexRoute: typeof ProtectedIndexRoute
+  ProtectedHospitalsIndexRoute: typeof ProtectedHospitalsIndexRoute
+  ProtectedHospitalsOrgIdIndexRoute: typeof ProtectedHospitalsOrgIdIndexRoute
+  ProtectedHospitalsOrgIdBillsBillIdRoute: typeof ProtectedHospitalsOrgIdBillsBillIdRoute
+  ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRoute: typeof ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRoute
 }
 
 const ProtectedRouteChildren: ProtectedRouteChildren = {
-  ProtectedDashboardRoute: ProtectedDashboardRouteWithChildren,
   ProtectedIndexRoute: ProtectedIndexRoute,
+  ProtectedHospitalsIndexRoute: ProtectedHospitalsIndexRoute,
+  ProtectedHospitalsOrgIdIndexRoute: ProtectedHospitalsOrgIdIndexRoute,
+  ProtectedHospitalsOrgIdBillsBillIdRoute:
+    ProtectedHospitalsOrgIdBillsBillIdRoute,
+  ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRoute:
+    ProtectedHospitalsOrgIdPrescriptionsPrescriptionIdRoute,
 }
 
 const ProtectedRouteWithChildren = ProtectedRoute._addFileChildren(
