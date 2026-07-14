@@ -1,4 +1,5 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import { setupListeners } from '@reduxjs/toolkit/query'
 import {
   FLUSH,
   PAUSE,
@@ -39,6 +40,9 @@ export const store = configureStore({
 })
 
 export const persistor = persistStore(store)
+
+// Powers refetchOnFocus / refetchOnReconnect in patientApi.
+setupListeners(store.dispatch)
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

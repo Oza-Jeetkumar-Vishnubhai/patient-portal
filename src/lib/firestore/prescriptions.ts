@@ -6,7 +6,7 @@ export async function getPrescriptionsForPatient(
   orgId: string,
   patientId: string,
 ): Promise<PrescriptionSummary[]> {
-  const ref = collection(db, 'organisations', orgId, 'patients', patientId, 'prescriptions')
+  const ref = collection(db, 'doctor', orgId, 'patients', patientId, 'prescriptions')
   const snap = await getDocs(query(ref, orderBy('created_at', 'desc')))
   return snap.docs.map((d) => ({ prescriptionId: d.id, data: d.data() as PrescriptionFormTypes }))
 }
@@ -17,7 +17,7 @@ export async function getPrescription(
   prescriptionId: string,
 ): Promise<PrescriptionFormTypes | null> {
   const snap = await getDoc(
-    doc(db, 'organisations', orgId, 'patients', patientId, 'prescriptions', prescriptionId),
+    doc(db, 'doctor', orgId, 'patients', patientId, 'prescriptions', prescriptionId),
   )
   if (!snap.exists()) return null
   return snap.data() as PrescriptionFormTypes
