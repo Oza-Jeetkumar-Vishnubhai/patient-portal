@@ -16,6 +16,12 @@ export interface PatientIndexDoc {
   organisations?: PatientIndexEntry[]
 }
 
+export interface FamilyMember {
+  phone: string
+  name: string | null
+  addedAt: number
+}
+
 export interface OrgInfo {
   name: string
   address?: string

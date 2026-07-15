@@ -8,7 +8,7 @@ import {
   Receipt,
   User as UserIcon,
 } from 'lucide-react'
-import { useAuth } from '#/contexts/AuthContext'
+import { useActivePhone } from '#/hooks/useActivePhone'
 import { useGetBillsQuery, useGetPrescriptionsQuery, useGetVisitsQuery } from '#/store/patientApi'
 import { EmptyState } from '#/components/EmptyState'
 import { Skeleton } from '#/components/ui/skeleton'
@@ -23,8 +23,7 @@ export const Route = createFileRoute('/_protected/hospitals/$orgId/')({
 
 function HospitalDetailPage() {
   const { orgId } = Route.useParams()
-  const { user } = useAuth()
-  const phone = user?.phoneNumber ?? ''
+  const phone = useActivePhone()
   const { data: visits, isLoading: visitsLoading } = useGetVisitsQuery(phone, { skip: !phone })
 
   const visit = visits?.find((v) => v.orgId === orgId)

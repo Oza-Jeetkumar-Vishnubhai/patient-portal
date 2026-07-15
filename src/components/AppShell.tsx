@@ -2,13 +2,28 @@ import { useState  } from 'react'
 import type {ReactNode} from 'react';
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Building2, Home as HomeIcon, LogOut, Stethoscope, User } from 'lucide-react'
+import {
+  Building2,
+  Home as HomeIcon,
+  LogOut,
+  Plus,
+  Settings,
+  Stethoscope,
+  Trash2,
+  User,
+} from 'lucide-react'
 import { useAuth } from '#/contexts/AuthContext'
 import { signOut } from '#/lib/auth'
 import { cn } from '#/lib/utils'
+import { nameInitials, phoneInitials } from '#/lib/initials'
+import { useAppDispatch } from '#/store/hooks'
+import { setActivePhone } from '#/store/familySlice'
+import { useGetFamilyMembersQuery, useRemoveFamilyMemberMutation } from '#/store/patientApi'
 import { Button } from '#/components/ui/button'
 import { Avatar, AvatarFallback } from '#/components/ui/avatar'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '#/components/ui/sheet'
+import { FamilySwitcher } from './FamilySwitcher'
+import { AddFamilyMemberDialog } from './AddFamilyMemberDialog'
 import ThemeToggle from './ThemeToggle'
 
 const NAV_ITEMS = [
@@ -21,19 +36,20 @@ function isActive(pathname: string, to: string) {
   return pathname === to || pathname.startsWith(`${to}/`)
 }
 
-function phoneInitials(phone: string | null | undefined) {
-  if (!phone) return 'P'
-  const digits = phone.replace(/\D/g, '')
-  return digits.slice(-2) || 'P'
-}
-
 export function AppShell({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const dispatch = useAppDispatch()
   const [profileOpen, setProfileOpen] = useState(false)
+  const [addMemberOpen, setAddMemberOpen] = useState(false)
+
+  const ownerPhone = user?.phoneNumber ?? ''
+  const { data: members = [] } = useGetFamilyMembersQuery(ownerPhone, { skip: !ownerPhone })
+  const [removeFamilyMember] = useRemoveFamilyMemberMutation()
 
   async function handleSignOut() {
+    dispatch(setActivePhone(null))
     await signOut()
     setProfileOpen(false)
     void navigate({ to: '/login' })
@@ -82,19 +98,16 @@ export function AppShell({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-3">
             <ThemeToggle />
+            <FamilySwitcher size="sm" />
             <button
               type="button"
               onClick={() => setProfileOpen(true)}
-              className="flex items-center gap-2 rounded-full border border-[var(--chip-line)] bg-[var(--chip-bg)] py-1 pl-1 pr-3 text-sm font-semibold text-[var(--sea-ink)] shadow-[0_8px_22px_rgba(30,90,72,0.08)] transition hover:-translate-y-0.5"
+              aria-label="Account settings"
+              className="rounded-full p-1.5 text-[var(--sea-ink-soft)] transition hover:text-[var(--sea-ink)]"
             >
-              <Avatar className="size-6">
-                <AvatarFallback className="bg-[var(--lagoon)] text-[10px] text-white">
-                  {phoneInitials(user?.phoneNumber)}
-                </AvatarFallback>
-              </Avatar>
-              {user?.phoneNumber}
+              <Settings className="size-4" />
             </button>
           </div>
         </div>
@@ -111,20 +124,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           </span>
           Patient Portal
         </Link>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <ThemeToggle />
-          <button
-            type="button"
-            onClick={() => setProfileOpen(true)}
-            aria-label="Account"
-            className="rounded-full"
-          >
-            <Avatar className="size-8 border border-[var(--chip-line)]">
-              <AvatarFallback className="bg-[var(--lagoon)] text-xs text-white">
-                {phoneInitials(user?.phoneNumber)}
-              </AvatarFallback>
-            </Avatar>
-          </button>
+          <FamilySwitcher />
         </div>
       </header>
 
@@ -176,6 +178,51 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <p className="m-0 text-xs text-[var(--sea-ink-soft)]">Signed in via OTP</p>
               </div>
             </div>
+            <div className="space-y-2">
+              <p className="m-0 text-xs font-semibold tracking-wide text-[var(--sea-ink-soft)] uppercase">
+                Family members
+              </p>
+              {members.length === 0 && (
+                <p className="m-0 text-sm text-[var(--sea-ink-soft)]">
+                  No family members added yet.
+                </p>
+              )}
+              {members.map((member) => (
+                <div
+                  key={member.phone}
+                  className="flex items-center gap-3 rounded-2xl border border-[var(--line)] p-3"
+                >
+                  <Avatar className="size-9">
+                    <AvatarFallback className="bg-[var(--chip-bg)] text-[var(--sea-ink)]">
+                      {nameInitials(member.name) ?? <User className="size-4" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="m-0 text-sm font-semibold text-[var(--sea-ink)]">
+                      {member.name || member.phone}
+                    </p>
+                    {member.name && (
+                      <p className="m-0 text-xs text-[var(--sea-ink-soft)]">{member.phone}</p>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Remove ${member.name || member.phone}`}
+                    onClick={() =>
+                      void removeFamilyMember({ ownerPhone, memberPhone: member.phone })
+                    }
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button variant="outline" className="w-full" onClick={() => setAddMemberOpen(true)}>
+                <Plus className="size-4" />
+                Add family member
+              </Button>
+            </div>
+
             <Button variant="outline" className="w-full" onClick={() => void handleSignOut()}>
               <LogOut className="size-4" />
               Sign out
@@ -183,6 +230,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </SheetContent>
       </Sheet>
+
+      <AddFamilyMemberDialog
+        open={addMemberOpen}
+        onOpenChange={setAddMemberOpen}
+        ownerPhone={ownerPhone}
+      />
     </div>
   )
 }

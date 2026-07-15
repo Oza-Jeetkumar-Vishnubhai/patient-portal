@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Building2, HeartPulse } from 'lucide-react'
-import { useAuth } from '#/contexts/AuthContext'
+import { useActivePhone } from '#/hooks/useActivePhone'
 import { useGetVisitsQuery } from '#/store/patientApi'
 import { HospitalCard } from '#/components/HospitalCard'
 import { EmptyState } from '#/components/EmptyState'
@@ -22,8 +22,7 @@ function greeting() {
 }
 
 function HomePage() {
-  const { user } = useAuth()
-  const phone = user?.phoneNumber ?? ''
+  const phone = useActivePhone()
   const { data: visits, isLoading, isError } = useGetVisitsQuery(phone, { skip: !phone })
 
   const mostRecent = (visits ?? [])

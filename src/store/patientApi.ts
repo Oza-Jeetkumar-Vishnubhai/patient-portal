@@ -4,7 +4,12 @@ import { getOrgInfo } from '#/lib/firestore/organisations'
 import { getPatientAtOrg } from '#/lib/firestore/patients'
 import { getBill, getBillsForPatient } from '#/lib/firestore/bills'
 import { getPrescription, getPrescriptionsForPatient } from '#/lib/firestore/prescriptions'
-import type { BillSummary, HospitalVisit, PrescriptionSummary } from '#/types'
+import {
+  addFamilyMember,
+  getFamilyMembers,
+  removeFamilyMember,
+} from '#/lib/firestore/familyMembers'
+import type { BillSummary, FamilyMember, HospitalVisit, PrescriptionSummary } from '#/types'
 
 /**
  * All patient-portal data reads go through this RTK Query api. Results are
@@ -28,6 +33,7 @@ export const patientApi = createApi({
   refetchOnMountOrArgChange: true,
   refetchOnFocus: true,
   refetchOnReconnect: true,
+  tagTypes: ['FamilyMembers'],
   endpoints: (builder) => ({
     getVisits: builder.query<HospitalVisit[], string>({
       queryFn: async (phone) => {
@@ -93,6 +99,42 @@ export const patientApi = createApi({
         }
       },
     }),
+
+    getFamilyMembers: builder.query<FamilyMember[], string>({
+      queryFn: async (ownerPhone) => {
+        try {
+          return { data: await getFamilyMembers(ownerPhone) }
+        } catch (err) {
+          return { error: err as Error }
+        }
+      },
+      providesTags: ['FamilyMembers'],
+    }),
+
+    addFamilyMember: builder.mutation<
+      void,
+      { ownerPhone: string; memberPhone: string; name: string | null }
+    >({
+      queryFn: async ({ ownerPhone, memberPhone, name }) => {
+        try {
+          return { data: await addFamilyMember(ownerPhone, memberPhone, name) }
+        } catch (err) {
+          return { error: err as Error }
+        }
+      },
+      invalidatesTags: ['FamilyMembers'],
+    }),
+
+    removeFamilyMember: builder.mutation<void, { ownerPhone: string; memberPhone: string }>({
+      queryFn: async ({ ownerPhone, memberPhone }) => {
+        try {
+          return { data: await removeFamilyMember(ownerPhone, memberPhone) }
+        } catch (err) {
+          return { error: err as Error }
+        }
+      },
+      invalidatesTags: ['FamilyMembers'],
+    }),
   }),
 })
 
@@ -102,4 +144,7 @@ export const {
   useGetPrescriptionByIdQuery,
   useGetBillsQuery,
   useGetBillByIdQuery,
+  useGetFamilyMembersQuery,
+  useAddFamilyMemberMutation,
+  useRemoveFamilyMemberMutation,
 } = patientApi

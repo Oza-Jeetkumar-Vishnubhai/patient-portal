@@ -13,9 +13,11 @@ import {
 import { storage } from './storage'
 import { patientApi } from './patientApi'
 import uiReducer from './uiSlice'
+import familyReducer from './familySlice'
 
 const rootReducer = combineReducers({
   ui: uiReducer,
+  family: familyReducer,
   [patientApi.reducerPath]: patientApi.reducer,
 })
 
@@ -23,8 +25,8 @@ const persistedReducer = persistReducer(
   {
     key: 'patient-app',
     storage,
-    // Cache patient data + ui prefs locally; nothing else needs persisting.
-    whitelist: ['ui', patientApi.reducerPath],
+    // Cache patient data + ui/family prefs locally; nothing else needs persisting.
+    whitelist: ['ui', 'family', patientApi.reducerPath],
   },
   rootReducer,
 )

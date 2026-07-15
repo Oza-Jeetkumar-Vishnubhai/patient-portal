@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 import { Building2, Search } from 'lucide-react'
-import { useAuth } from '#/contexts/AuthContext'
+import { useActivePhone } from '#/hooks/useActivePhone'
 import { useGetVisitsQuery } from '#/store/patientApi'
 import { HospitalCard } from '#/components/HospitalCard'
 import { EmptyState } from '#/components/EmptyState'
@@ -11,8 +11,7 @@ import { Input } from '#/components/ui/input'
 export const Route = createFileRoute('/_protected/hospitals/')({ component: HospitalsPage })
 
 function HospitalsPage() {
-  const { user } = useAuth()
-  const phone = user?.phoneNumber ?? ''
+  const phone = useActivePhone()
   const { data: visits, isLoading, isError } = useGetVisitsQuery(phone, { skip: !phone })
   const [search, setSearch] = useState('')
 

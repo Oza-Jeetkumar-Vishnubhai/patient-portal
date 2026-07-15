@@ -9,7 +9,7 @@ import {
   Receipt,
   Stethoscope,
 } from 'lucide-react'
-import { useAuth } from '#/contexts/AuthContext'
+import { useActivePhone } from '#/hooks/useActivePhone'
 import { useGetPrescriptionByIdQuery, useGetVisitsQuery } from '#/store/patientApi'
 import { EmptyState } from '#/components/EmptyState'
 import { Skeleton } from '#/components/ui/skeleton'
@@ -31,8 +31,7 @@ const DOSAGE_LABELS: { key: keyof DosageTypes; short: string }[] = [
 
 function PrescriptionDetailPage() {
   const { orgId, prescriptionId } = Route.useParams()
-  const { user } = useAuth()
-  const phone = user?.phoneNumber ?? ''
+  const phone = useActivePhone()
   const { data: visits, isLoading: visitsLoading } = useGetVisitsQuery(phone, { skip: !phone })
   const visit = visits?.find((v) => v.orgId === orgId)
 

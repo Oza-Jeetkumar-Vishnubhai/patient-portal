@@ -4,10 +4,10 @@ import {
   signInWithCredential,
   signInWithPhoneNumber,
   signOut as firebaseSignOut
-  
+
 } from 'firebase/auth'
 import type {ConfirmationResult} from 'firebase/auth';
-import { auth } from './firebase'
+import { auth, getSecondaryAuth } from './firebase'
 
 export type { ConfirmationResult }
 
@@ -45,4 +45,40 @@ export async function verifyOtp(
 
 export async function signOut(): Promise<void> {
   await firebaseSignOut(auth)
+}
+
+let memberRecaptchaVerifier: RecaptchaVerifier | null = null
+
+function getMemberRecaptchaVerifier(containerId: string): RecaptchaVerifier {
+  if (memberRecaptchaVerifier) {
+    memberRecaptchaVerifier.clear()
+    memberRecaptchaVerifier = null
+  }
+  memberRecaptchaVerifier = new RecaptchaVerifier(getSecondaryAuth(), containerId, { size: 'invisible' })
+  return memberRecaptchaVerifier
+}
+
+/** Sends an OTP to a family member's phone, on an auth instance isolated from the signed-in owner. */
+export async function sendMemberOtp(phoneNumber: string): Promise<ConfirmationResult> {
+  const verifier = getMemberRecaptchaVerifier('recaptcha-container-member')
+  await verifier.render()
+  return signInWithPhoneNumber(getSecondaryAuth(), phoneNumber, verifier)
+}
+
+/**
+ * Verifies the family member's OTP and returns their verified phone number.
+ * The secondary session is signed out immediately after — it's only ever
+ * used to prove phone ownership, never persisted or treated as a login.
+ */
+export async function verifyMemberOtp(
+  confirmationResult: ConfirmationResult,
+  otp: string,
+): Promise<string> {
+  const secondaryAuth = getSecondaryAuth()
+  const credential = PhoneAuthProvider.credential(confirmationResult.verificationId, otp)
+  const result = await signInWithCredential(secondaryAuth, credential)
+  const verifiedPhone = result.user.phoneNumber
+  await firebaseSignOut(secondaryAuth)
+  if (!verifiedPhone) throw new Error('Phone verification did not return a phone number')
+  return verifiedPhone
 }

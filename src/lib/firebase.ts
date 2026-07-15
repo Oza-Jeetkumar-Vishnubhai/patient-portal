@@ -17,3 +17,14 @@ const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
 
 export const auth = getAuth(app)
 export const db = getFirestore(app)
+
+/**
+ * A second, isolated Firebase Auth instance used only to OTP-verify a family
+ * member's phone number. Running that verification on the shared `auth`
+ * above would sign the current user out and sign the family member in
+ * instead — this keeps the owner's session untouched.
+ */
+export function getSecondaryAuth() {
+  const secondaryApp = getApps().find((a) => a.name === 'secondary') ?? initializeApp(firebaseConfig, 'secondary')
+  return getAuth(secondaryApp)
+}
